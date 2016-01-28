@@ -13,6 +13,29 @@ public class TwitchOded : MonoBehaviour
     public Text ChatText;
     public InputField MessageText;
 
+    int rightRock;
+    int rightScissors;
+    int rightPaper;
+
+    int leftRock;
+    int leftScissors;
+    int leftPaper;
+
+
+    public Text rightRockText;
+    public Text rightScissorsText;
+    public Text rightPaperText;
+    public Text leftRockText;
+    public Text leftScissorsText;
+    public Text leftPaperText;
+
+    public Text rightPlayersText;
+    public Text leftPlayersText;
+
+    public List<string> playersLeft;
+    public List<string> playersRight;
+    bool CurrentLeftRight = false;
+
     void Start()
     {
         //Subscribe for events
@@ -48,12 +71,94 @@ public class TwitchOded : MonoBehaviour
         Debug.Log(message);
     }
 
+
+    bool findPlayerGroup(string player) // reutrn true if left
+    {
+        if (playersLeft.Contains(player))
+        {
+            return true;
+        }
+        else if (playersRight.Contains(player))
+        {
+            
+            return false;
+        } else
+        {
+            addUser(player);
+            return !CurrentLeftRight;
+        }
+            
+    }
+
     //Receive username that has been left from channel 
     void OnChannelMessage(ChannelMessageEventArgs channelMessageArgs)
     {
         Debug.Log("MESSAGE: " + channelMessageArgs.From + ": " + channelMessageArgs.Message);
         ChatText.text += "<b>" + channelMessageArgs.From + ":</b> " + channelMessageArgs.Message + "\n";
-       
+
+        bool left = findPlayerGroup(channelMessageArgs.From);
+        switch  (channelMessageArgs.Message[1])
+        {
+            case 'r':
+            case 'R':
+                if (left)
+                    leftRock++;
+                else
+                    rightRock++;                
+                break;
+            case 'p':
+            case 'P':
+                if (left)
+                    leftPaper++;
+                else
+                    rightPaper++;
+                break;
+            case 's':
+            case 'S':
+                if (left)
+                    leftScissors++;
+                else
+                    rightScissors++;
+                break;
+            default:
+                break;
+        }
+
+        rightRockText.text = rightRock.ToString();
+        rightScissorsText.text = rightScissors.ToString();
+        rightPaperText.text = rightPaper.ToString();
+        leftRockText.text = leftRock.ToString();
+        leftScissorsText.text = leftScissors.ToString();
+        leftPaperText.text = leftPaper.ToString();
+
+        Debug.Log(channelMessageArgs.Message[1] + "  " + leftRock + "," + leftPaper + "," + leftScissors + " " + rightRock + "," + rightPaper + "," + rightScissors);
+
+}
+
+    void addUser(string user)
+    {
+        if (CurrentLeftRight)
+        { // choose the one with less players
+            playersLeft.Add(user);
+
+        }
+        else
+        {
+            playersRight.Add(user);
+        }
+        CurrentLeftRight = !CurrentLeftRight;
+
+        rightPlayersText.text = "";
+        foreach (string player in playersRight)
+        {
+            rightPlayersText.text += " " + player;
+        }
+
+        leftPlayersText.text = "";
+        foreach (string playerL in playersLeft)
+        {
+            leftPlayersText.text += " " + playerL;
+        }
     }
 
     //Get the name of the user who joined to channel 
@@ -61,6 +166,11 @@ public class TwitchOded : MonoBehaviour
     {
         ChatText.text += "<b>" + "USER JOINED" + ":</b> " + userJoinedArgs.User + "\n";
         Debug.Log("USER JOINED: " + userJoinedArgs.User);
+        addUser(userJoinedArgs.User);
+
+   
+
+
     }
 
 
