@@ -10,6 +10,10 @@ public class TwitchOded : MonoBehaviour
     //public InputField TokenText;
     //public InputField ChannelText;
 
+    public int GameLength;
+    public int StartLength;
+    public int PauseLength;
+
     public Text ChatText;
     public InputField MessageText;
 
@@ -32,9 +36,18 @@ public class TwitchOded : MonoBehaviour
     public Text rightPlayersText;
     public Text leftPlayersText;
 
+    public Text LogRightText;
+    public Text LogLeftText;
+
+    public Text Message;
+
     public List<string> playersLeft;
     public List<string> playersRight;
     bool CurrentLeftRight = false;
+
+    float StarGameTimer;
+    float EndGameTimer;
+    float NewGameTimer;
 
     void Start()
     {
@@ -44,9 +57,147 @@ public class TwitchOded : MonoBehaviour
         TwitchIrc.Instance.OnUserJoined += OnUserJoined;
         TwitchIrc.Instance.OnServerMessage += OnServerMessage;
         TwitchIrc.Instance.OnExceptionThrown += OnExceptionThrown;
+        StartNewGame();
     }
     
+    void EndGame()
+    {
+    }
 
+    void StartNewGame()
+    {
+        StarGameTimer = Time.time + StartLength;
+        EndGameTimer = StarGameTimer + GameLength;
+        NewGameTimer = EndGameTimer + PauseLength;
+
+         rightRock=0;
+         rightScissors=0;
+         rightPaper=0;
+
+         leftRock=0;
+         leftScissors=0;
+         leftPaper=0;
+
+        LogRightText.text = "";
+        LogLeftText.text = "";
+
+
+        rightRockText.text = rightRock.ToString();
+        rightScissorsText.text = rightScissors.ToString();
+        rightPaperText.text = rightPaper.ToString();
+        leftRockText.text = leftRock.ToString();
+        leftScissorsText.text = leftScissors.ToString();
+        leftPaperText.text = leftPaper.ToString();
+
+    }
+    void Update()
+    {
+        if (StarGameTimer > Time.time) // before game
+        {
+            Message.text = "Game Starts in :\n" + (StarGameTimer - Time.time).ToString("F0");
+        } else // game is runining
+        {
+            if (EndGameTimer > Time.time) // game in progress
+            {
+                Message.text = "Time Left : \n" + (EndGameTimer - Time.time).ToString("F2");
+            } else // game over
+            {
+                Message.text = "Results:" + GetWinner();
+                if (NewGameTimer < Time.time)
+                {
+                    StartNewGame();
+                }
+            }
+        }
+
+    }
+
+    string GetWinner()
+    {
+        string rightWin="";
+        if (rightRock > rightScissors)
+        {
+            if (rightRock > rightPaper)
+            {
+                rightWin = "r";
+            } else
+            {
+                rightWin = "p";
+            }
+        } else
+        {
+            if (rightScissors > rightPaper)
+            {
+                rightWin = "s";
+            }
+            else
+            {
+                rightWin = "p";
+            }
+        }
+
+        
+
+        string leftWin="";
+        // left
+        if (leftRock > leftScissors)
+        {
+            if (leftRock > leftPaper)
+            {
+                leftWin = "r";
+            }
+            else
+            {
+                leftWin = "p";
+            }
+        }
+        else
+        {
+            if (leftScissors > leftPaper)
+            {
+                leftWin = "s";
+            }
+            else
+            {
+                leftWin = "p";
+            }
+        }
+
+        string winner = "";
+
+        if (leftWin == "s")
+        {
+            if (rightWin == "s")
+                winner = "tie";
+            if (rightWin == "r")
+                winner = "<color=red>right</color>";
+            if (rightWin == "p")
+                winner = "<color=blue>left</color>";
+        }
+
+        if (leftWin == "p")
+        {
+            if (rightWin == "s")
+                winner = "<color=red>right</color>";
+            if (rightWin == "r")
+                winner = "<color=blue>left</color>";
+            if (rightWin == "p")
+                winner = "tie";
+        }
+
+        if (leftWin == "r")
+        {
+            if (rightWin == "s")
+                winner = "<color=blue>left</color>";
+            if (rightWin == "r")
+                winner = "tie";
+            if (rightWin == "p")
+                winner = "<color=red>right</color>";
+                    
+        }
+
+        return "left: " + leftWin + " right:" + rightWin + "\nWinner : " +winner;
+    }
     //Send message
     public void MessageSend()
     {
@@ -96,7 +247,24 @@ public class TwitchOded : MonoBehaviour
         Debug.Log("MESSAGE: " + channelMessageArgs.From + ": " + channelMessageArgs.Message);
         ChatText.text += "<b>" + channelMessageArgs.From + ":</b> " + channelMessageArgs.Message + "\n";
 
+
+        if ((StarGameTimer > Time.time) || (EndGameTimer < Time.time))
+        {
+            // game isn't running.
+            return;
+        }
+
         bool left = findPlayerGroup(channelMessageArgs.From);
+
+        if (left) {
+            LogLeftText.text += "<color=blue>" + channelMessageArgs.From + ":" + channelMessageArgs.Message[1].ToString().ToString()
+                +"</color>\n";
+        }
+        else {
+            LogRightText.text += "<color=red>" + channelMessageArgs.From + ":" + channelMessageArgs.Message[1].ToString().ToString()
+               + "</color>\n";
+        }
+
         switch  (channelMessageArgs.Message[1])
         {
             case 'r':
@@ -177,8 +345,11 @@ public class TwitchOded : MonoBehaviour
     //Get the name of the user who left the channel.
     void OnUserLeft(UserLeftEventArgs userLeftArgs)
     {
-        ChatText.text += "<b>" + "USER JOINED" + ":</b> " + userLeftArgs.User + "\n";
-        Debug.Log("USER JOINED: " + userLeftArgs.User);
+        ChatText.text += "<b>" + "USER LEFT" + ":</b> " + userLeftArgs.User + "\n";
+        Debug.Log("USER LEFT: " + userLeftArgs.User);
+
+        playersLeft.Remove(userLeftArgs.User);
+        playersRight.Remove(userLeftArgs.User);
     }
 
     //Receive exeption if something goes wrong
