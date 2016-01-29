@@ -51,6 +51,7 @@ public class TwitchOded : MonoBehaviour
 
     public Image rightImage;
     public Image leftImage;
+    public Image arrowImage;
 
     public Sprite LeftRockSprite;
     public Sprite LeftPaperSprite;
@@ -63,6 +64,9 @@ public class TwitchOded : MonoBehaviour
 
     public Sprite blankSprite;
 
+
+    public Sprite LeftArrowSprite;
+    public Sprite RightArrowSprite;
 
 
     bool postedWinner;
@@ -110,6 +114,7 @@ public class TwitchOded : MonoBehaviour
 
         leftImage.sprite = blankSprite;
         rightImage.sprite = blankSprite;
+        arrowImage.sprite = blankSprite;
 
         if (TwitchIrc.Instance.isActiveAndEnabled)
         {
@@ -117,6 +122,19 @@ public class TwitchOded : MonoBehaviour
         }
 
     }
+
+    void updateArrow()
+    {
+        string winner = calcWinner(getLeftWinner(), getrightWinner());
+        if (winner == "right")
+            arrowImage.sprite = RightArrowSprite;
+        else if (winner == "left")
+            arrowImage.sprite = LeftArrowSprite;
+        else
+            arrowImage.sprite = blankSprite;
+    }
+
+
     void Update()
     {
         if (StarGameTimer > Time.time) // before game
@@ -129,10 +147,9 @@ public class TwitchOded : MonoBehaviour
 
                 Message.text = "Time Left : \n" + (EndGameTimer - Time.time).ToString("F2");
 
-                
-
                 setWinnerImageLeft(getLeftWinner());
                 setWinnerImageRight(getrightWinner());
+                updateArrow();
 
             } else // game over
             {
@@ -230,6 +247,52 @@ public class TwitchOded : MonoBehaviour
 
     }
 
+    string colorifyWinner(string winner)
+    {
+        if (winner == "right")
+            return "<color=red>right</color>";
+        if (winner == "left")
+            return "<color=blue>left</color>";
+        return winner;
+    }
+        
+
+    string calcWinner(string leftWin, string rightWin) // left true
+    {
+        string winner = "";
+        if (leftWin == "s")
+        {
+            if (rightWin == "s")
+                winner = "tie";
+            if (rightWin == "r")
+                winner = "right";
+            if (rightWin == "p")
+                winner = "left";
+        }
+
+        if (leftWin == "p")
+        {
+            if (rightWin == "s")
+                winner = "right";
+            if (rightWin == "r")
+                winner = "left";
+            if (rightWin == "p")
+                winner = "tie";
+        }
+
+        if (leftWin == "r")
+        {
+            if (rightWin == "s")
+                winner = "left";
+            if (rightWin == "r")
+                winner = "tie";
+            if (rightWin == "p")
+                winner = "right";
+
+        }
+
+        return winner;
+    }
     string GetWinner()
     {
 
@@ -253,38 +316,9 @@ public class TwitchOded : MonoBehaviour
         string leftWin= getLeftWinner();
         setWinnerImageLeft(leftWin);
 
-        string winner = "";
+        string winner = calcWinner(leftWin, rightWin);
+        string colorWinner = colorifyWinner(winner);
 
-        if (leftWin == "s")
-        {
-            if (rightWin == "s")
-                winner = "tie";
-            if (rightWin == "r")
-                winner = "<color=red>right</color>";
-            if (rightWin == "p")
-                winner = "<color=blue>left</color>";
-        }
-
-        if (leftWin == "p")
-        {
-            if (rightWin == "s")
-                winner = "<color=red>right</color>";
-            if (rightWin == "r")
-                winner = "<color=blue>left</color>";
-            if (rightWin == "p")
-                winner = "tie";
-        }
-
-        if (leftWin == "r")
-        {
-            if (rightWin == "s")
-                winner = "<color=blue>left</color>";
-            if (rightWin == "r")
-                winner = "tie";
-            if (rightWin == "p")
-                winner = "<color=red>right</color>";
-                    
-        }
 
 
 
@@ -292,13 +326,13 @@ public class TwitchOded : MonoBehaviour
         string rps = "Left: R=" + leftRock + " P=" + leftPaper + "S=" + leftScissors + " Right R=" + rightRock + " P=" + rightPaper + " S=" + rightScissors;
         //TwitchIrc.Instance.Message(rps);
         string win1 = "left: " + leftWin + " right:" + rightWin;
-        string win2 = "Winner : " + winner;
+        string win2 = "Winner : " + colorWinner;
        // TwitchIrc.Instance.Message("Results:" + win1);
         //TwitchIrc.Instance.Message(win2);
         string winners = win1 + "\n" + win2;
 
         if (postedWinner == false)
-            postWinner(rps,win1,win2);
+            postWinner(rps,win1,"winner: " + winner);
         return winners;
     }
 
@@ -372,16 +406,31 @@ public class TwitchOded : MonoBehaviour
 
         bool left = findPlayerGroup(channelMessageArgs.From);
 
+
+        Debug.Log("'" + channelMessageArgs.Message + "'");
+        char c = channelMessageArgs.Message[0];
+        if (c == ':')
+            c = channelMessageArgs.Message[1];
+
+
         if (left) {
-            LogLeftText.text += "<color=blue>" + channelMessageArgs.From + ":" + channelMessageArgs.Message[1].ToString().ToString()
+            LogLeftText.text += "<color=blue>" + channelMessageArgs.From + ":" + c
                 +"</color>\n";
         }
         else {
-            LogRightText.text += "<color=red>" + channelMessageArgs.From + ":" + channelMessageArgs.Message[1].ToString().ToString()
+            LogRightText.text += "<color=red>" + channelMessageArgs.From + ":" + c 
                + "</color>\n";
         }
 
-        switch  (channelMessageArgs.Message[1])
+
+        /*
+        string upperC = c.ToString().ToUpper(); 
+        if (upperC != "R" && upperC != "P" && upperC !="S") {
+            
+        }*/
+        
+
+        switch  (c)
         {
             case 'r':
             case 'R':
@@ -415,7 +464,7 @@ public class TwitchOded : MonoBehaviour
         leftScissorsText.text = leftScissors.ToString();
         leftPaperText.text = leftPaper.ToString();
 
-        Debug.Log(channelMessageArgs.Message[1] + "  " + leftRock + "," + leftPaper + "," + leftScissors + " " + rightRock + "," + rightPaper + "," + rightScissors);
+        Debug.Log(c + "  " + leftRock + "," + leftPaper + "," + leftScissors + " " + rightRock + "," + rightPaper + "," + rightScissors);
 
 }
 
