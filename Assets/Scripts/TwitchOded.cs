@@ -89,6 +89,8 @@ public class TwitchOded : MonoBehaviour
         leftScissorsText.text = leftScissors.ToString();
         leftPaperText.text = leftPaper.ToString();
 
+        //TwitchIrc.Instance.Message("New Game starts in " + (PauseLength + StarGameTimer ) + "seconds");
+
     }
     void Update()
     {
@@ -114,6 +116,16 @@ public class TwitchOded : MonoBehaviour
 
     string GetWinner()
     {
+
+        if (rightRock == 0 && 
+         rightScissors == 0 &&
+         rightPaper == 0 &&
+
+         leftRock == 0 &&
+         leftScissors == 0 &&
+         leftPaper == 0 )
+        return "No One Played!";
+
         string rightWin="";
         if (rightRock > rightScissors)
         {
@@ -196,7 +208,18 @@ public class TwitchOded : MonoBehaviour
                     
         }
 
-        return "left: " + leftWin + " right:" + rightWin + "\nWinner : " +winner;
+
+
+
+        string rps = "Left: R=" + leftRock + " P=" + leftPaper + "S=" + leftScissors + " Right R=" + rightRock + " P=" + rightPaper + " S=" + rightScissors;
+        TwitchIrc.Instance.Message(rps);
+        string win1 = "left: " + leftWin + " right:" + rightWin;
+        string win2 = "Winner : " + winner;
+        TwitchIrc.Instance.Message("Results:" + win1);
+        TwitchIrc.Instance.Message(win2);
+        string winners = win1 + "\n" + win2; 
+
+        return winners;
     }
     //Send message
     public void MessageSend()
@@ -314,6 +337,9 @@ public class TwitchOded : MonoBehaviour
         {
             playersRight.Add(user);
         }
+
+        TwitchIrc.Instance.Message("Welcome " + user + " You in the " + (CurrentLeftRight ? "Left":"Right") + " team");
+
         CurrentLeftRight = !CurrentLeftRight;
 
         rightPlayersText.text = "";
@@ -327,6 +353,8 @@ public class TwitchOded : MonoBehaviour
         {
             leftPlayersText.text += " " + playerL;
         }
+
+        
     }
 
     //Get the name of the user who joined to channel 
