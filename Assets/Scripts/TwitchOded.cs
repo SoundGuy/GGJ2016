@@ -71,6 +71,14 @@ public class TwitchOded : MonoBehaviour
 
     bool postedWinner;
 
+    public AudioSource music;
+    public GameObject iconParticlePF;
+    public GameObject TextParticlePF;
+
+    public GameObject HamletPF;
+
+    public Hamlet hamlet;
+
     void Start()
     {
         //Subscribe for events
@@ -115,7 +123,7 @@ public class TwitchOded : MonoBehaviour
         leftImage.sprite = blankSprite;
         rightImage.sprite = blankSprite;
         arrowImage.sprite = blankSprite;
-
+        music.Play();
         if (TwitchIrc.Instance.isActiveAndEnabled)
         {
            TwitchIrc.Instance.Message("New Game starts in " + (PauseLength + StartLength) + "seconds");
@@ -391,6 +399,43 @@ public class TwitchOded : MonoBehaviour
             
     }
 
+    void MakeParticle(Image parent, Sprite sprite)
+    {
+        GameObject go = (GameObject) Instantiate(iconParticlePF, Vector3.zero, Quaternion.identity);
+        go.transform.SetParent(parent.transform);
+        Vector2 pos = go.GetComponent<RectTransform>().position;
+        pos.x = parent.GetComponent<RectTransform>().position.x;
+        pos.y = parent.GetComponent<RectTransform>().position.y;
+        go.GetComponent<RectTransform>().position = pos;
+        go.GetComponent<Image>().sprite = sprite;
+
+    }
+
+    void MakeParticleHamlet(Image parent)
+    {
+        GameObject go = (GameObject)Instantiate(HamletPF, Vector3.zero, Quaternion.identity);
+        go.transform.SetParent(parent.transform);
+        Vector2 pos = go.GetComponent<RectTransform>().position;
+        pos.x = parent.GetComponent<RectTransform>().position.x;
+        pos.y = parent.GetComponent<RectTransform>().position.y+80;
+        go.GetComponent<RectTransform>().position = pos;
+        //go.GetComponent<Image>().sprite = HamletSprite;
+
+    }
+
+    void MakeParticleText(Image parent, string word)
+    {
+        GameObject go = (GameObject)Instantiate(TextParticlePF, Vector3.zero, Quaternion.identity);
+        go.transform.SetParent(parent.transform);
+        Vector2 pos = go.GetComponent<RectTransform>().position;
+        pos.x = parent.GetComponent<RectTransform>().position.x;
+        pos.y = parent.GetComponent<RectTransform>().position.y+10;
+        go.GetComponent<RectTransform>().position = pos;
+        go.GetComponent<Text>().text = word;
+
+    }
+
+
     //Receive username that has been left from channel 
     void OnChannelMessage(ChannelMessageEventArgs channelMessageArgs)
     {
@@ -422,36 +467,65 @@ public class TwitchOded : MonoBehaviour
                + "</color>\n";
         }
 
+        int hamletScore = 1;
+        string[] words = channelMessageArgs.Message.Split(' ');
+        MakeParticleText(left ? leftImage : rightImage, words[0]);
+
+        if (hamlet.IsHamlet(words[0]))
+        {
+            MakeParticleHamlet(left ? leftImage : rightImage);
+            hamletScore = 10;
+        }
 
         /*
         string upperC = c.ToString().ToUpper(); 
         if (upperC != "R" && upperC != "P" && upperC !="S") {
             
         }*/
-        
+
 
         switch  (c)
         {
             case 'r':
             case 'R':
                 if (left)
-                    leftRock++;
+                {
+                    leftRock+= hamletScore;
+                    MakeParticle(leftImage, LeftRockSprite);
+                    
+                }
                 else
-                    rightRock++;                
+                {
+                    rightRock+= hamletScore;
+                    MakeParticle(rightImage, RightRockSprite);
+                }
                 break;
             case 'p':
             case 'P':
                 if (left)
-                    leftPaper++;
+                {
+                    leftPaper+= hamletScore;
+                    MakeParticle(leftImage, LeftPaperSprite);
+                }
                 else
-                    rightPaper++;
+                {
+                    rightPaper+= hamletScore;
+                    MakeParticle(rightImage, RightPaperSprite);
+                }
                 break;
             case 's':
             case 'S':
                 if (left)
-                    leftScissors++;
+                {
+                    leftScissors+= hamletScore;
+                    MakeParticle(leftImage, LeftScissorsSprite);
+                }
                 else
-                    rightScissors++;
+                {
+
+                    rightScissors+= hamletScore;
+                    MakeParticle(rightImage, RightScissorsSprite);
+                }
                 break;
             default:
                 break;
