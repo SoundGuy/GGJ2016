@@ -117,14 +117,17 @@ public class TwitchOded : MonoBehaviour
     string GetWinner()
     {
 
-        if (rightRock == 0 && 
+        if (rightRock == 0 &&
          rightScissors == 0 &&
          rightPaper == 0 &&
 
          leftRock == 0 &&
          leftScissors == 0 &&
-         leftPaper == 0 )
-        return "No One Played!";
+         leftPaper == 0)
+        {
+            TwitchIrc.Instance.Message("Results: no oneplayed!");
+            return "No One Played!";
+        }
 
         string rightWin="";
         if (rightRock > rightScissors)
