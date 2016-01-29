@@ -125,7 +125,7 @@ public class TwitchOded : MonoBehaviour
          leftScissors == 0 &&
          leftPaper == 0)
         {
-            TwitchIrc.Instance.Message("Results: no oneplayed!");
+            //TwitchIrc.Instance.Message("Results: no oneplayed!");
             return "No One Played!";
         }
 
@@ -215,11 +215,11 @@ public class TwitchOded : MonoBehaviour
 
 
         string rps = "Left: R=" + leftRock + " P=" + leftPaper + "S=" + leftScissors + " Right R=" + rightRock + " P=" + rightPaper + " S=" + rightScissors;
-        TwitchIrc.Instance.Message(rps);
+        //TwitchIrc.Instance.Message(rps);
         string win1 = "left: " + leftWin + " right:" + rightWin;
         string win2 = "Winner : " + winner;
-        TwitchIrc.Instance.Message("Results:" + win1);
-        TwitchIrc.Instance.Message(win2);
+        //TwitchIrc.Instance.Message("Results:" + win1);
+       // TwitchIrc.Instance.Message(win2);
         string winners = win1 + "\n" + win2; 
 
         return winners;
@@ -341,7 +341,7 @@ public class TwitchOded : MonoBehaviour
             playersRight.Add(user);
         }
 
-        TwitchIrc.Instance.Message("Welcome " + user + " You in the " + (CurrentLeftRight ? "Left":"Right") + " team");
+      //  TwitchIrc.Instance.Message("Welcome " + user + " You in the " + (CurrentLeftRight ? "Left":"Right") + " team");
 
         CurrentLeftRight = !CurrentLeftRight;
 
