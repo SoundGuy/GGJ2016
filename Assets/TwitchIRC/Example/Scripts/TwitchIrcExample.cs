@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Irc;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class TwitchIrcExample : MonoBehaviour
 {
@@ -23,6 +24,16 @@ public class TwitchIrcExample : MonoBehaviour
         TwitchIrc.Instance.OnExceptionThrown += OnExceptionThrown;
     }
 
+    void Update()
+    {
+      
+    }
+
+
+    public void StartGame()
+    {
+        SceneManager.LoadScene("Scenes/MainGame");
+    }
     public void Connect()
     {
         TwitchIrc.Instance.Username = UsernameText.text;
@@ -30,6 +41,7 @@ public class TwitchIrcExample : MonoBehaviour
         TwitchIrc.Instance.Channel = ChannelText.text;
 
         TwitchIrc.Instance.Connect();
+      // 
     }
 
     //Send message

@@ -49,6 +49,24 @@ public class TwitchOded : MonoBehaviour
     float EndGameTimer;
     float NewGameTimer;
 
+    public Image rightImage;
+    public Image leftImage;
+
+    public Sprite LeftRockSprite;
+    public Sprite LeftPaperSprite;
+    public Sprite LeftScissorsSprite;
+
+
+    public Sprite RightRockSprite;
+    public Sprite RightPaperSprite;
+    public Sprite RightScissorsSprite;
+
+    public Sprite blankSprite;
+
+
+
+    bool postedWinner;
+
     void Start()
     {
         //Subscribe for events
@@ -81,6 +99,7 @@ public class TwitchOded : MonoBehaviour
         LogRightText.text = "";
         LogLeftText.text = "";
 
+        postedWinner = false;
 
         rightRockText.text = rightRock.ToString();
         rightScissorsText.text = rightScissors.ToString();
@@ -89,9 +108,12 @@ public class TwitchOded : MonoBehaviour
         leftScissorsText.text = leftScissors.ToString();
         leftPaperText.text = leftPaper.ToString();
 
+        leftImage.sprite = blankSprite;
+        rightImage.sprite = blankSprite;
+
         if (TwitchIrc.Instance.isActiveAndEnabled)
         {
-           TwitchIrc.Instance.Message("New Game starts in " + (PauseLength + StarGameTimer) + "seconds");
+           TwitchIrc.Instance.Message("New Game starts in " + (PauseLength + StartLength) + "seconds");
         }
 
     }
@@ -104,7 +126,14 @@ public class TwitchOded : MonoBehaviour
         {
             if (EndGameTimer > Time.time) // game in progress
             {
+
                 Message.text = "Time Left : \n" + (EndGameTimer - Time.time).ToString("F2");
+
+                
+
+                setWinnerImageLeft(getLeftWinner());
+                setWinnerImageRight(getrightWinner());
+
             } else // game over
             {
                 Message.text = "Results:" + GetWinner();
@@ -114,6 +143,90 @@ public class TwitchOded : MonoBehaviour
                 }
             }
         }
+
+    }
+
+    string getLeftWinner()
+    {
+        return GetSideWInner(leftRock, leftScissors, leftPaper);
+    }
+    string getrightWinner()
+    {
+        return GetSideWInner(rightRock, rightScissors, rightPaper);
+    }
+
+    string GetSideWInner(int r, int s, int p)
+    {
+        if (r == 0 && s == 0 && p == 0)
+            return "b";
+        if (r > s)
+        {
+            if (r > p)
+            {
+                return "r";
+            } else
+            {
+                return "p";
+            }
+        } else
+        {
+            if (s > p)
+            {
+                return "s";
+            }
+            else
+            {
+                return "p";
+            }
+        }
+    }
+
+
+    void setWinnerImageLeft(string rps)
+    {
+
+        //todo make switch case?
+        if (rps == "r")
+        {
+            leftImage.sprite = LeftRockSprite;
+        }
+        if (rps == "p")
+        {
+            leftImage.sprite = LeftPaperSprite;
+        }
+        if (rps == "s")
+        {
+            leftImage.sprite = LeftScissorsSprite;
+        }
+        if (rps == "b")
+        {
+            leftImage.sprite = blankSprite;
+        }
+
+        
+    }
+
+    void setWinnerImageRight(string rps)
+    {
+
+        //todo make switch case?
+        if (rps == "r")
+        {
+            rightImage.sprite = RightRockSprite;
+        }
+        if (rps == "p")
+        {
+            rightImage.sprite = RightPaperSprite;
+        }
+        if (rps == "s")
+        {
+            rightImage.sprite = RightScissorsSprite;
+        }
+        if (rps == "b")
+        {
+            rightImage.sprite = blankSprite;
+        }
+
 
     }
 
@@ -132,54 +245,13 @@ public class TwitchOded : MonoBehaviour
             return "No One Played!";
         }
 
-        string rightWin="";
-        if (rightRock > rightScissors)
-        {
-            if (rightRock > rightPaper)
-            {
-                rightWin = "r";
-            } else
-            {
-                rightWin = "p";
-            }
-        } else
-        {
-            if (rightScissors > rightPaper)
-            {
-                rightWin = "s";
-            }
-            else
-            {
-                rightWin = "p";
-            }
-        }
+        string rightWin=getrightWinner();
 
+        setWinnerImageRight(rightWin);
         
 
-        string leftWin="";
-        // left
-        if (leftRock > leftScissors)
-        {
-            if (leftRock > leftPaper)
-            {
-                leftWin = "r";
-            }
-            else
-            {
-                leftWin = "p";
-            }
-        }
-        else
-        {
-            if (leftScissors > leftPaper)
-            {
-                leftWin = "s";
-            }
-            else
-            {
-                leftWin = "p";
-            }
-        }
+        string leftWin= getLeftWinner();
+        setWinnerImageLeft(leftWin);
 
         string winner = "";
 
@@ -223,9 +295,24 @@ public class TwitchOded : MonoBehaviour
         string win2 = "Winner : " + winner;
        // TwitchIrc.Instance.Message("Results:" + win1);
         //TwitchIrc.Instance.Message(win2);
-        string winners = win1 + "\n" + win2; 
+        string winners = win1 + "\n" + win2;
 
+        if (postedWinner == false)
+            postWinner(rps,win1,win2);
         return winners;
+    }
+
+    void postWinner(string rps, string win1, string win2)
+    {
+        if (postedWinner == true)
+            return;
+
+        postedWinner = true;
+        TwitchIrc.Instance.Message(rps);       
+        TwitchIrc.Instance.Message("Results:" + win1);
+        TwitchIrc.Instance.Message(win2);
+
+
     }
     //Send message
     public void MessageSend()
