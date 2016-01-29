@@ -89,7 +89,10 @@ public class TwitchOded : MonoBehaviour
         leftScissorsText.text = leftScissors.ToString();
         leftPaperText.text = leftPaper.ToString();
 
-        //TwitchIrc.Instance.Message("New Game starts in " + (PauseLength + StarGameTimer ) + "seconds");
+        if (TwitchIrc.Instance.isActiveAndEnabled)
+        {
+           TwitchIrc.Instance.Message("New Game starts in " + (PauseLength + StarGameTimer) + "seconds");
+        }
 
     }
     void Update()
@@ -218,8 +221,8 @@ public class TwitchOded : MonoBehaviour
         //TwitchIrc.Instance.Message(rps);
         string win1 = "left: " + leftWin + " right:" + rightWin;
         string win2 = "Winner : " + winner;
-        //TwitchIrc.Instance.Message("Results:" + win1);
-       // TwitchIrc.Instance.Message(win2);
+       // TwitchIrc.Instance.Message("Results:" + win1);
+        //TwitchIrc.Instance.Message(win2);
         string winners = win1 + "\n" + win2; 
 
         return winners;
@@ -341,7 +344,7 @@ public class TwitchOded : MonoBehaviour
             playersRight.Add(user);
         }
 
-      //  TwitchIrc.Instance.Message("Welcome " + user + " You in the " + (CurrentLeftRight ? "Left":"Right") + " team");
+        TwitchIrc.Instance.Message("Welcome " + user + " You in the " + (CurrentLeftRight ? "Left":"Right") + " team");
 
         CurrentLeftRight = !CurrentLeftRight;
 
