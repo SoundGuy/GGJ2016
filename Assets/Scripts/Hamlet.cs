@@ -12,13 +12,13 @@ public class Hamlet : MonoBehaviour {
         string[] splittedWords = hamletDict.Split(' ');
         foreach (string word in splittedWords)
         {
-            words.Add(word);
+            words.Add(word.ToUpper());
         }
 	}
 	
     public bool IsHamlet(string word)
     {
-        return words.Contains(word);
+        return words.Contains(word.ToUpper());
     }
 	// Update is called once per frame
 	void Update () {

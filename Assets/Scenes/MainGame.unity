@@ -225,7 +225,8 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "Insturctions: Type words that start with\n  (R)ock,(P)aper,(S)cissors together.
-    \nMost of these for each team is selected to challange other team for the win"
+    \nMost of these for each team is selected to challange other team for the win.
+    Extra points if you use words from Hamlet."
 --- !u!222 &98135720
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -481,7 +482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a868ee84af869f144a26ae91db482f1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameLength: 30
+  GameLength: 120
   StartLength: 10
   PauseLength: 10
   ChatText: {fileID: 1519580532}
